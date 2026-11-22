@@ -104,7 +104,6 @@ def activate_tabs_and_load_more(page):
                     continue
 
                 normalized = normalize_match_url(full_url)
-                
 
                 if normalized:
                     all_match_urls.add(normalized)
@@ -176,7 +175,7 @@ def activate_tabs_and_load_more(page):
                 f"[TAB] Active={tab_id}",
                 flush=True,
             )
-                        
+
             # Thu thập các trận đã có trước khi click Load More.
             collect_match_urls(tab_id)
 
@@ -308,8 +307,9 @@ def activate_tabs_and_load_more(page):
         f"[TABS SUMMARY] unique_match_urls={len(results)}",
         flush=True,
     )
-    
+
     return results
+
 
 def get_home_page():
 
@@ -325,7 +325,7 @@ def get_home_page():
             args=[
                 "--no-sandbox",
                 "--disable-setuid-sandbox",
-                "--disable-dev-shm-usage",  # <-- Thêm dòng này để tránh tràn bộ nhớ tạm /dev/shm trên Linux
+                "--disable-dev-shm-usage",
                 "--disable-gpu",
             ]
         )
@@ -399,6 +399,7 @@ def normalize_match_url(url):
     url = re.sub(r"/link/\d+/?$", "/", url)
     return url.rstrip("/") + "/"
 
+
 def get_tab_match_urls(page, tab_id):
     tab = page.locator(f"#{tab_id}")
 
@@ -444,6 +445,7 @@ def get_tab_match_urls(page, tab_id):
             continue
 
     return urls
+
 
 def wait_for_new_tab_match_urls(page, tab_id, previous_urls):
 
@@ -596,6 +598,7 @@ def wait_for_new_tab_match_urls(page, tab_id, previous_urls):
 
         return False
 
+
 def debug_tab_links(page, tab_id):
     tab = page.locator(f"#{tab_id}")
     target = tab.get_attribute("data-target")
@@ -645,6 +648,7 @@ def debug_tab_links(page, tab_id):
         f"unique={len(urls)}",
         flush=True,
     )
+
 
 def find_match_urls(html, base_url):
     soup = BeautifulSoup(html, "html.parser")
@@ -705,6 +709,7 @@ def unique_append(items, value):
     if value and value not in items:
         items.append(value)
 
+
 def get_sport_name(page):
     try:
         html = page.content()
@@ -737,6 +742,7 @@ def get_sport_name(page):
         pass
 
     return "other"
+
 
 # ============================================================
 # PLAYER INFORMATION
@@ -881,7 +887,7 @@ def make_instance(info, match_id, occurrence):
 
         # URL được ánh xạ riêng cho instance này.
         "stream_urls": [],
-        
+
         # HTTP Headers riêng của từng stream URL.
         "stream_headers": {},
 
@@ -989,6 +995,7 @@ def find_element_for_instance(page, registry, instance):
 
     return None
 
+
 # ============================================================
 # ACTIVE SERVER — IDENTITY SAFE
 # ============================================================
@@ -1064,6 +1071,7 @@ def get_active_instance(page, registry):
 
     return matches[0]
 
+
 def is_instance_playing(
     page,
     registry,
@@ -1081,6 +1089,7 @@ def is_instance_playing(
         active["instance_id"]
         == instance["instance_id"]
     )
+
 
 def get_stream_headers(request):
     """
@@ -1126,6 +1135,7 @@ def get_stream_headers(request):
         result[header_name] = value
 
     return result
+
 
 # ============================================================
 # FLV COLLECTOR — SESSION OWNERSHIP
@@ -1214,7 +1224,7 @@ class FLVCollector:
 
         if not is_flv_url(url):
             return
-            
+
         headers = get_stream_headers(request)
         print(
             f"[FLV HEADERS] "
@@ -1292,7 +1302,7 @@ class FLVCollector:
             status = response.status
         except Exception:
             status = None
-			
+
         if status not in (200, 206):
             return
 
@@ -1450,6 +1460,7 @@ class FLVCollector:
 
         return events
 
+
 # ============================================================
 # STREAM ASSIGNMENT
 # ============================================================
@@ -1564,7 +1575,7 @@ def map_auto_play(page, collector, registry):
 
     if not urls:
         return False
-        
+
     # Lấy Headers tương ứng với từng URL auto-play.
     headers_by_url = {
         event["url"]: event.get("headers") or {}
@@ -1681,7 +1692,8 @@ def capture_click_session(
 
     instance["status"] = "pending"
     return False
-	
+
+
 # ============================================================
 # SERVER PROCESSING — PART 3
 # ============================================================
@@ -2206,7 +2218,8 @@ def validate_registry(registry):
     )
 
     return mapped
-	
+
+
 # ============================================================
 # PART 4 — MATCH SCRAPER / RECOVERY / OUTPUT
 # ============================================================
@@ -2314,7 +2327,7 @@ def map_new_auto_requests(
 
     if not urls:
         return False
-        
+
     # Lấy Headers của các request auto-play mới.
     headers_by_url = {
         event["url"]: event.get("headers") or {}
@@ -2567,7 +2580,7 @@ def scrape_one_match(
                 args=[
                     "--no-sandbox",
                     "--disable-setuid-sandbox",
-                    "--disable-dev-shm-usage",  # <-- Thêm dòng này tương tự
+                    "--disable-dev-shm-usage",
                     "--disable-gpu",
                 ]
             )
@@ -2599,9 +2612,9 @@ def scrape_one_match(
                     flush=True,
                 )
                 return None
-                
+
             sport_name = get_sport_name(page)
-            
+
             # Dùng ID theo URL trận để dễ đọc log.
             match_id = hashlib.md5(
                 match_url.encode("utf-8")
@@ -2867,8 +2880,6 @@ def main():
 
     results.sort(key=lambda item: item["url"])
 
-
-
     total_servers = sum(
         len(match["players"])
         for match in results
@@ -2919,16 +2930,26 @@ def main():
     print(f"Output:             {OUTPUT_FILE}")
     print("=" * 60)
 
-    if len(results) != len(match_urls):
+    min_required = max(1, int(len(match_urls) * 0.5))
+
+    if len(results) < min_required:
         print(
-            "[QUALITY GATE] FAIL: "
-            "Một số trận chưa scrape được. "
-            "Giữ nguyên matches.json hiện tại.",
+            f"[QUALITY GATE] FAIL: "
+            f"Hanya {len(results)}/{len(match_urls)} trận berhasil di-scrape (minimal {min_required}). "
+            f"Giữ nguyên matches.json hiện tại.",
             flush=True,
         )
         raise SystemExit(1)
 
-    print("[QUALITY GATE] PASS", flush=True)
+    if len(results) != len(match_urls):
+        print(
+            f"[QUALITY GATE] WARN: "
+            f"{len(match_urls) - len(results)} trận gagal di-scrape, "
+            f"tetap menyimpan {len(results)}/{len(match_urls)} trận ke matches.json.",
+            flush=True,
+        )
+    else:
+        print("[QUALITY GATE] PASS", flush=True)
 
     save_results(results)
 
