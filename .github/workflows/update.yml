@@ -2,6 +2,13 @@ name: Update IPTV
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '10 8 * * *'   # 15:10 WIB (cover kick-off 15:30 & 16:00)
+    - cron: '10 11 * * *'  # 18:10 WIB (cover kick-off 18:30 & 19:00)
+    - cron: '45 12 * * *'  # 19:45 WIB (cover kick-off 20:00 & 21:00)
+    - cron: '40 15 * * *'  # 22:40 WIB (cover kick-off 23:00 & 23:30)
+    - cron: '45 16 * * *'  # 23:45 WIB (cover kick-off 00:00 & 00:30)
+    - cron: '45 18 * * *'  # 01:45 WIB (cover kick-off 02:00, 02:45 & 03:00)
 
 concurrency:
   group: update-iptv
@@ -20,6 +27,7 @@ jobs:
         run: |
           set -euo pipefail
           echo "Event: ${{ github.event_name }}"
+          echo "Schedule: ${{ github.event.schedule }}"
           echo "Repository: ${{ github.repository }}"
           echo "Branch: ${{ github.ref_name }}"
           echo "Current UTC: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
